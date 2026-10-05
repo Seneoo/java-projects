@@ -1,0 +1,223 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define max 100
+struct clienti
+{
+    int codiceC;
+    char cognome[20];
+    char nome[20];
+    char data[20];
+    char indirizzo[20];
+    int telefono;
+};
+struct viaggi
+{
+    int codice;
+    char datapart[20];
+    char destinazione[20];
+    char datarientro[20];
+    float costo;
+    int codiceV;
+};
+int main()
+{
+    struct clienti c[max];
+    struct viaggi v[max];
+    int nC,nV;
+    FILE *fpc,*fpv;
+    int i;
+    //inserimento dei dati
+    do
+    {
+        printf("Inserire il numero di clienti: ");
+        scanf("%d",&nC);
+    }while(nC>max);
+    for( i=0;i<nC;i++)
+    {
+        printf("Inserire il codice del cliente: ");
+        scanf("%d",&c[i].codiceC);
+        printf("Inserire il cognome del cliente: ");
+        scanf("%s",c[i].cognome);
+        printf("Inserire il nome del cliente: ");
+        scanf("%s",c[i].nome);
+        printf("Inserire la data di nascita del cliente: ");
+        scanf("%s",c[i].data);
+        printf("Inserire l'indirizzo del cliente: ");
+        scanf("%s",c[i].indirizzo);
+        printf("Inserire il numero di telefono del cliente: ");
+        scanf("%d",&c[i].telefono);
+    }
+    do
+    {
+        printf("Inserire il numero di viaggi: ");
+        scanf("%d",&nV);
+    }while(nV>max);
+    for(i=0;i<nV;i++)
+    {
+        printf("Inserire il codice del viaggio: ");
+        scanf("%d",&v[i].codice);
+        printf("Inserire la data di partenza del viaggio: ");
+        scanf("%s",v[i].datapart);
+        printf("Inserire la destinazione del viaggio: ");
+        scanf("%s",v[i].destinazione);
+        printf("Inserire la data di rientro del viaggio: ");
+        scanf("%s",v[i].datarientro);
+        printf("Inserire il costo del viaggio: ");
+        scanf("%f",&v[i].costo);
+        printf("Inserire il codice del cliente associato al viaggio: ");
+        scanf("%d",&v[i].codiceV);
+    }
+    fpc=fopen("clienti.dat","wb");
+    fpv=fopen("viaggi.dat","wb");
+    if(fpc==NULL || fpv==NULL)
+    {
+        printf("Errore nell'apertura dei file");
+        exit(1);
+    }
+    fwrite(c,sizeof(struct clienti),nC,fpc);
+    fwrite(v,sizeof(struct viaggi),nV,fpv);
+    fclose(fpc);
+    fclose(fpv);
+    //caricamento dei dati dai file
+    fpc=fopen("clienti.dat","rb");
+    fpv=fopen("viaggi.dat","rb");
+    if(fpc==NULL || fpv==NULL)
+    {
+        printf("Errore nell'apertura dei file");
+        exit(1);
+    }
+    //aggiorna dati 
+    nC=fread(c,sizeof(struct clienti),max,fpc);
+    nV=fread(v,sizeof(struct viaggi),max,fpv);
+    fclose(fpc);
+    fclose(fpv);
+    int risp;
+    do
+    {
+        printf("MENU'\n");
+        printf("1. Visualizzare il numero di viaggi con destinazione Venezia\n");
+        printf("2. Ricercare tramite codice i dati anagrafici\n");
+        printf("3. Visualizzare il costo totale dei viaggi scelti\n");
+        printf("4.Aggiungere un nuovo cliente in coda\n");
+        printf("5.Visualizzare le informazioni del quarto viaggio presente nel file\n");
+        printf("6. Uscire\n");
+        printf("Inserire la scelta: ");
+        scanf("%d",&risp);
+        if(risp!=1 && risp!=2 && risp!=3 && risp!=4 && risp!=5 && risp!=6)
+        {
+            printf("Scelta non valida\n");
+        }
+    }while(risp<1||risp>6);
+    switch(risp)
+    {
+        case 1:
+        {   //num viaggi destinazione Venezia
+            int count=0;
+            for( i=0;i<nV;i++)
+            {
+                if(strcmp(v[i].destinazione,"Venezia")==0)
+                { 
+                  count++;
+                }
+            }
+            printf("Il numero di viaggi con destinazione Venezia Ã¨: %d\n", count);
+            break;
+        }
+        case 2:
+        {
+            //ricerca tramite codice
+            int codice;
+            int counter=0;
+            printf("Inserire il codice del cliente da ricercare:\n");
+            scanf("%d",&codice);
+            for(i=0;i<nC;i++)
+            {
+                if(c[i].codiceC==codice)
+                {
+                    printf("Codice: %d\n",c[i].codiceC);
+                    printf("Cognome: %s\n",c[i].cognome);
+                    printf("Nome: %s\n",c[i].nome);
+                    printf("Data di nascita: %s\n",c[i].data);
+                    printf("Indirizzo: %s\n",c[i].indirizzo);
+                    printf("Telefono: %d\n",c[i].telefono);
+                    counter++;
+                }
+            }
+            if(counter==0)
+            {
+                printf("Cliente non trovato\n");
+            }
+            break;
+        }
+        case 3:
+        {
+            //costo totale dei viaggi
+            int codiceCliente;
+            float costoTotale=0;
+            printf("Inserire il codice cliente per calcolare il costo totale dei viaggi: ");
+            scanf("%d",&codiceCliente);
+            for(i=0;i<nV;i++)
+            {
+                if(v[i].codiceV==codiceCliente)
+                {
+                    costoTotale+=v[i].costo;
+                }
+            }
+            printf("Il costo totale dei viaggi per il cliente con codice %d Ã¨: %f\n", codiceCliente, costoTotale);
+            break;
+        }
+        case 4:
+        {
+            //aggiungere un nuovo cliente in coda
+            if(nC<max)
+            {
+                printf("Inserire il codice del nuovo cliente: ");
+                scanf("%d",&c[nC].codiceC);
+                printf("Inserire il cognome del nuovo cliente: ");
+                scanf("%s",c[nC].cognome);
+                printf("Inserire il nome del nuovo cliente: ");
+                scanf("%s",c[nC].nome);
+                printf("Inserire la data di nascita del nuovo cliente: ");
+                scanf("%s",c[nC].data);
+                printf("Inserire l'indirizzo del nuovo cliente: ");
+                scanf("%s",c[nC].indirizzo);
+                printf("Inserire il numero di telefono del nuovo cliente: ");
+                scanf("%d",&c[nC].telefono);
+                nC++;
+                fpc=fopen("clienti.dat","ab");
+                fseek(fpc,0,2); 
+                fwrite(&c[nC-1],sizeof(struct clienti),1,fpc);
+                fclose(fpc);
+            }
+            else
+            {
+                printf("Numero massimo di clienti raggiunto\n");
+            }
+            break;
+        }
+        case 5:
+        {
+            //visualizzare le informazioni del quarto viaggio presente nel file
+            if(nV>=4)
+            {
+                printf("Codice viaggio: %d\n",v[3].codice);
+                printf("Data di partenza: %s\n",v[3].datapart);
+                printf("Destinazione: %s\n",v[3].destinazione);
+                printf("Data di rientro: %s\n",v[3].datarientro);
+                printf("Costo: %f\n",v[3].costo);
+                printf("Codice cliente associato: %d\n",v[3].codiceV);
+            }
+            else
+            {
+                printf("Non ci sono abbastanza viaggi nel file\n");
+            }
+            break;
+        }
+        case 6:
+        {
+            printf("Uscita dal programma\n");
+            break;
+        }
+    }
+}
